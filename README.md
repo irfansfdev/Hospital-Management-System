@@ -1,36 +1,144 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🏥 Hospital Management System
 
-## Getting Started
+A modern **Hospital Management System** built with **Next.js** and **Supabase**, designed to manage hospital operations through dedicated dashboards for **Patients, Doctors, and Administrators**.
 
-First, run the development server:
+## 🚀 Tech Stack
+
+* **Next.js**
+* **React**
+* **Supabase**
+* **JavaScript**
+* **Tailwind CSS**
+* **Supabase Authentication**
+* **Supabase Database**
+
+## 👥 User Roles
+
+### 🧑‍⚕️ Doctor
+
+Doctors can manage their medical workflow through a dedicated dashboard, including:
+
+* View assigned patients
+* Manage appointments
+* View patient information
+* Update appointment/consultation details
+* Manage their doctor profile
+
+### 👨‍💼 Admin
+
+Administrators have control over the hospital management system, including:
+
+* Manage doctors
+* Manage patients
+* Manage appointments
+* Monitor hospital activities
+* Manage system data
+* Access administrative dashboard
+
+### 🧑‍🦽 Patient
+
+Patients can use their dashboard to:
+
+* Register and manage their profile
+* View available doctors
+* Book appointments
+* View appointment status
+* Manage their appointments
+* View relevant medical information
+
+## ✨ Key Features
+
+* 🔐 Authentication & role-based access
+* 👨‍⚕️ Doctor management
+* 🧑‍🦽 Patient management
+* 📅 Appointment management
+* 📊 Dedicated dashboards
+* 🗄️ Supabase database integration
+* 🔒 Secure data access
+* 📱 Responsive interface
+* ⚡ Next.js App Router
+* 🔄 Real-time database capabilities through Supabase
+
+## 📁 Project Structure
+
+```text
+Hospital-Management-System/
+│
+├── app/
+│   ├── admin/
+│   ├── doctor/
+│   ├── patient/
+│   └── ...
+│
+├── components/
+├── lib/
+├── public/
+├── supabase/
+├── .env.local
+├── package.json
+└── README.md
+```
+
+## ⚙️ Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/irfansfdev/Hospital-Management-System.git
+```
+
+Navigate to the project:
+
+```bash
+cd Hospital-Management-System
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Create a `.env.local` file and add your Supabase credentials:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
+
+Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```text
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🔑 Application Views
 
-## Learn More
+| Role          | Dashboard         |
+| ------------- | ----------------- |
+| 🧑‍🦽 Patient | Patient Dashboard |
+| 🧑‍⚕️ Doctor  | Doctor Dashboard  |
+| 👨‍💼 Admin   | Admin Dashboard   |
 
-To learn more about Next.js, take a look at the following resources:
+## 🎯 Project Goal
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The goal of this project is to provide a centralized platform for managing hospital activities while giving **patients, doctors, and administrators** their own dedicated workflows and interfaces.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🛠️ Future Improvements
 
-## Deploy on Vercel
+* Online payment integration
+* Advanced medical records
+* Prescription management
+* Notifications
+* Advanced analytics
+* Telemedicine support
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Built with Next.js & Supabase.**
