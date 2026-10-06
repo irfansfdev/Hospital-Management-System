@@ -3,8 +3,10 @@ import PaymentsTable from "@/features/billing/component/payments-table";
 
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { connection } from "next/server";
 
 export default async function PaymentsPage() {
+  await connection();
   const payments = await getPaymentsAction();
 
   return (

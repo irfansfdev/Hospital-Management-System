@@ -3,8 +3,10 @@ import { getInvoicesAction } from "@/features/billing/actions";
 import BillingTable from "@/features/billing/component/billing-table";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { connection } from "next/server";
 
 export default async function BillingPage() {
+  await connection();
   const invoices = await getInvoicesAction();
 
   return (

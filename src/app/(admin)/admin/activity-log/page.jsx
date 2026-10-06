@@ -2,9 +2,12 @@ import { Card } from "@/components/ui/card";
 import { ActivityLogItem } from "@/components/ui/activity-log-item";
 import PaginationSearchBar from "@/components/ui/PaginationSearchBar";
 import PaginationControlsWrapper from "@/components/ui/PaginationControlsWrapper";
-import { cookies } from "next/headers";
+import { createClient } from "@/lib/supabase/server";
+import { paginateQuery } from "@/lib/paginateQuery";
+import { connection } from "next/server";
 
 export default async function AdminActivityLogPage({ searchParams }) {
+  await connection();
   const params = await searchParams;
 
   const parsedPage = Number.parseInt(params.page ?? "1", 10);
@@ -17,37 +20,41 @@ export default async function AdminActivityLogPage({ searchParams }) {
     Number.isFinite(parsedLimit) && parsedLimit > 0 ? parsedLimit : 10;
 
   const query = params.q ?? "";
+  const supabase = await createClient();
 
-  const cookieStore = await cookies();
-
-  const queryParams = new URLSearchParams({
-    page: String(page),
-    limit: String(limit),
-  });
+  let activityQuery = supabase
+    .from("activity_logs")
+    .select(
+      "id, action, target_table, target_id, created_at, profiles(full_name)",
+      { count: "exact" },
+    )
+    .order("created_at", { ascending: false });
 
   if (query) {
-    queryParams.set("q", query);
-  }
-
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_SITE_URL}/api/activity-log?${queryParams.toString()}`,
-    {
-      cache: "no-store",
-      headers: {
-        cookie: cookieStore.toString(),
-      },
-    }
-  );
-
-  if (!res.ok) {
-    throw new Error(await res.text());
+    activityQuery = activityQuery.or(
+      `action.ilike.%${query}%,target_table.ilike.%${query}%`,
+    );
   }
 
   const {
-    logs = [],
-    totalCount = 0,
-    totalPages = 1,
-  } = await res.json();
+    data: activityLogs,
+    count: totalCount,
+    totalPages,
+    error,
+  } = await paginateQuery(activityQuery, { page, limit });
+
+  if (error) {
+    throw new Error(`Failed to load activity logs: ${error.message}`);
+  }
+
+  const logs = (activityLogs ?? []).map((log) => ({
+    id: log.id,
+    actor_name: log.profiles?.full_name ?? "Unknown",
+    action: log.action,
+    target_table: log.target_table,
+    target_id: log.target_id,
+    created_at: log.created_at,
+  }));
 
   return (
     <div className="text-foreground">
