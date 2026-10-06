@@ -225,8 +225,14 @@ create table if not exists public.activity_logs (
   target_id text,
   created_at timestamptz not null default now(),
   constraint activity_logs_actor_id_fkey
-    foreign key (actor_id) references public.profiles (id) on delete restrict
+    foreign key (actor_id) references public.profiles (id) on delete set null
 );
+
+alter table public.activity_logs
+  drop constraint if exists activity_logs_actor_id_fkey;
+alter table public.activity_logs
+  add constraint activity_logs_actor_id_fkey
+    foreign key (actor_id) references public.profiles (id) on delete set null;
 
 create index if not exists profiles_role_idx on public.profiles (role);
 create index if not exists profiles_full_name_idx on public.profiles (full_name);
@@ -370,6 +376,89 @@ begin
 end
 $$;
 
+create or replace function private.log_activity_change()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  old_row jsonb;
+  new_row jsonb;
+  changed_row jsonb;
+  entity_name text;
+  event_action text;
+  target_id text;
+begin
+  if tg_op = 'INSERT' then
+    new_row := to_jsonb(new);
+    changed_row := new_row;
+    event_action := 'Created';
+  elsif tg_op = 'UPDATE' then
+    old_row := to_jsonb(old);
+    new_row := to_jsonb(new);
+
+    if old_row is not distinct from new_row then
+      return new;
+    end if;
+
+    changed_row := new_row;
+    event_action := 'Updated';
+  else
+    old_row := to_jsonb(old);
+    changed_row := old_row;
+    event_action := 'Deleted';
+  end if;
+
+  entity_name := case tg_table_name
+    when 'doctor_schedules' then 'doctor schedule'
+    when 'prescription_items' then 'prescription item'
+    when 'invoice_items' then 'invoice item'
+    else regexp_replace(tg_table_name, '_', ' ', 'g')
+  end;
+
+  if tg_op = 'UPDATE'
+    and old_row ? 'status'
+    and old_row -> 'status' is distinct from new_row -> 'status' then
+    event_action := format(
+      'Changed %s status from %s to %s',
+      entity_name,
+      coalesce(initcap(old_row ->> 'status'), 'Unknown'),
+      coalesce(initcap(new_row ->> 'status'), 'Unknown')
+    );
+  else
+    event_action := format('%s %s', event_action, entity_name);
+  end if;
+
+  target_id := coalesce(
+    changed_row ->> 'id',
+    changed_row ->> 'profile_id',
+    changed_row ->> 'appointment_id',
+    changed_row ->> 'prescription_id',
+    changed_row ->> 'invoice_id'
+  );
+
+  insert into public.activity_logs (
+    actor_id,
+    action,
+    target_table,
+    target_id
+  )
+  values (
+    auth.uid(),
+    event_action,
+    tg_table_name,
+    target_id
+  );
+
+  if tg_op = 'DELETE' then
+    return old;
+  end if;
+
+  return new;
+end
+$$;
+
 create or replace function private.set_profile_updated_at()
 returns trigger
 language plpgsql
@@ -495,6 +584,56 @@ drop trigger if exists prescriptions_guard_update on public.prescriptions;
 create trigger prescriptions_guard_update
   before update on public.prescriptions
   for each row execute function private.guard_prescription_update();
+
+drop trigger if exists profiles_activity_log on public.profiles;
+create trigger profiles_activity_log
+  after insert or update or delete on public.profiles
+  for each row execute function private.log_activity_change();
+
+drop trigger if exists doctors_activity_log on public.doctors;
+create trigger doctors_activity_log
+  after insert or update or delete on public.doctors
+  for each row execute function private.log_activity_change();
+
+drop trigger if exists patients_activity_log on public.patients;
+create trigger patients_activity_log
+  after insert or update or delete on public.patients
+  for each row execute function private.log_activity_change();
+
+drop trigger if exists doctor_schedules_activity_log on public.doctor_schedules;
+create trigger doctor_schedules_activity_log
+  after insert or update or delete on public.doctor_schedules
+  for each row execute function private.log_activity_change();
+
+drop trigger if exists appointments_activity_log on public.appointments;
+create trigger appointments_activity_log
+  after insert or update or delete on public.appointments
+  for each row execute function private.log_activity_change();
+
+drop trigger if exists prescriptions_activity_log on public.prescriptions;
+create trigger prescriptions_activity_log
+  after insert or update or delete on public.prescriptions
+  for each row execute function private.log_activity_change();
+
+drop trigger if exists prescription_items_activity_log on public.prescription_items;
+create trigger prescription_items_activity_log
+  after insert or update or delete on public.prescription_items
+  for each row execute function private.log_activity_change();
+
+drop trigger if exists invoices_activity_log on public.invoices;
+create trigger invoices_activity_log
+  after insert or update or delete on public.invoices
+  for each row execute function private.log_activity_change();
+
+drop trigger if exists invoice_items_activity_log on public.invoice_items;
+create trigger invoice_items_activity_log
+  after insert or update or delete on public.invoice_items
+  for each row execute function private.log_activity_change();
+
+drop trigger if exists payments_activity_log on public.payments;
+create trigger payments_activity_log
+  after insert or update or delete on public.payments
+  for each row execute function private.log_activity_change();
 
 alter table public.profiles enable row level security;
 alter table public.doctors enable row level security;
