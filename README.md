@@ -2,6 +2,21 @@
 
 A modern **Hospital Management System** built with **Next.js** and **Supabase**, designed to manage hospital operations through dedicated dashboards for **Patients, Doctors, and Administrators**.
 
+## 🚀 Live Demo
+
+**🌐 [View Live Project]([YOUR_VERCEL_URL](https://irfan-hospital-management-system.vercel.app)**
+
+> 💡 The live application opens on the login page. Use the demo credentials below to explore the Patient and Doctor dashboards without creating an account.
+
+### 🔑 Demo Credentials
+
+| Role          | Email                | Password                |
+| ------------- | -------------------- | ----------------------- |
+| 🧑‍🦽 Patient | `patient@hms.test` | `Password123` |
+| 🧑‍⚕️ Doctor  | `doctor@hms.test`  | `Password123`  |
+
+**Note:** These accounts are provided only for demonstration purposes.
+
 ## 🚀 Tech Stack
 
 * **Next.js**
