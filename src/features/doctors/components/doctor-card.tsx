@@ -2,37 +2,21 @@
 
 import Image from "next/image";
 import type { Doctor } from "@/features/doctors/types";
-import Button from "@/components/ui/button";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { deleteDoctorAction } from "../actions";
 import { MoreVertical, Pencil, Trash2, Eye } from "lucide-react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import { Dropdown } from "@/components/ui/select";
 
 type DoctorCardProps = {
   doctor: Doctor;
 };
 
 export default function DoctorCard({ doctor }: DoctorCardProps) {
-  const [menuOpen, setMenuOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setMenuOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
 
   const handleDelete = async () => {
     try {
@@ -119,93 +103,46 @@ export default function DoctorCard({ doctor }: DoctorCardProps) {
               </div>
 
               {/* Menu */}
-              <div className="relative shrink-0" ref={menuRef}>
-                <Button
-                  text=""
-                  variant="ghost"
-                  className="
-                    h-6 w-6 p-0
-                    dark:border-[#3A4A63]
-                    dark:bg-[#0A162A]
-                    dark:text-[#CBD5E1]
-                    dark:hover:bg-[#18243A]
-                  "
-                  icon={
-                    <MoreVertical className="h-3.5 w-3.5 text-gray-600 dark:text-[#CBD5E1]" />
-                  }
-                  onClick={() => setMenuOpen((prev) => !prev)}
+              <Dropdown>
+                <Dropdown.Trigger
                   aria-label="Doctor actions"
-                />
+                  className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md border border-gray-300 bg-white p-0 text-black hover:bg-gray-100 dark:border-[#3A4A63] dark:bg-[#0A162A] dark:text-[#CBD5E1] dark:hover:bg-[#18243A]"
+                >
+                  <MoreVertical className="h-3.5 w-3.5 text-gray-600 dark:text-[#CBD5E1]" />
+                </Dropdown.Trigger>
 
-                {menuOpen && (
-                  <div
-                    className="
-                      absolute right-0 top-8 z-50 w-36 overflow-hidden
-                      rounded-lg border border-gray-200 bg-white py-1
-                      shadow-lg ring-1 ring-black/5
-                      dark:border-[#334155] dark:bg-[#0A162A]
-                      dark:ring-white/5
-                    "
+                <Dropdown.Content
+                  align="right"
+                  className="w-36 overflow-hidden rounded-lg border-gray-200 bg-white py-1 shadow-lg ring-1 ring-black/5 dark:border-[#334155] dark:bg-[#0A162A] dark:ring-white/5"
+                >
+                  <Dropdown.Item
+                    onSelect={() => router.push(`/admin/doctors/${doctor.id}`)}
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:text-[#CBD5E1] dark:hover:bg-[#18243A]"
                   >
-                    {/* View */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        router.push(`/admin/doctors/${doctor.id}`);
-                      }}
-                      className="
-                        flex w-full items-center gap-2 px-3 py-2
-                        text-xs font-medium text-gray-700
-                        transition-colors hover:bg-gray-50
-                        dark:text-[#CBD5E1]
-                        dark:hover:bg-[#18243A]
-                      "
-                    >
-                      <Eye className="h-3.5 w-3.5 text-gray-500 dark:text-[#94A3B8]" />
-                      <span>View</span>
-                    </button>
+                    <Eye className="h-3.5 w-3.5 text-gray-500 dark:text-[#94A3B8]" />
+                    <span>View</span>
+                  </Dropdown.Item>
 
-                    {/* Edit */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        router.push(`/admin/doctors/${doctor.id}/edit`);
-                      }}
-                      className="
-                        flex w-full items-center gap-2 px-3 py-2
-                        text-xs font-medium text-gray-700
-                        transition-colors hover:bg-gray-50
-                        dark:text-[#CBD5E1]
-                        dark:hover:bg-[#18243A]
-                      "
-                    >
-                      <Pencil className="h-3.5 w-3.5 text-gray-500 dark:text-[#94A3B8]" />
-                      <span>Edit</span>
-                    </button>
+                  <Dropdown.Item
+                    onSelect={() =>
+                      router.push(`/admin/doctors/${doctor.id}/edit`)
+                    }
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:text-[#CBD5E1] dark:hover:bg-[#18243A]"
+                  >
+                    <Pencil className="h-3.5 w-3.5 text-gray-500 dark:text-[#94A3B8]" />
+                    <span>Edit</span>
+                  </Dropdown.Item>
 
-                    {/* Delete */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        setDeleteModalOpen(true);
-                      }}
-                      className="
-                        flex w-full items-center gap-2 px-3 py-2
-                        text-xs font-medium text-red-600
-                        transition-colors hover:bg-red-50
-                        dark:text-red-400
-                        dark:hover:bg-red-950/30
-                      "
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                      <span>Delete</span>
-                    </button>
-                  </div>
-                )}
-              </div>
+                  <Dropdown.Item
+                    onSelect={() => setDeleteModalOpen(true)}
+                    destructive
+                    className="flex items-center gap-2 px-3 py-2 text-xs font-medium transition-colors hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/30"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span>Delete</span>
+                  </Dropdown.Item>
+                </Dropdown.Content>
+              </Dropdown>
             </div>
           </div>
 

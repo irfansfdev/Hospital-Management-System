@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { MoreVertical, Eye, Pencil, Stethoscope, X, Plus } from "lucide-react";
+import { Dropdown } from "@/components/ui/select";
 
 export default function DoctorAppointmentList({ appointments = [] }) {
   const [sidebar, setSidebar] = useState({
@@ -11,11 +12,8 @@ export default function DoctorAppointmentList({ appointments = [] }) {
     data: null,
   });
 
-  const [activeDropdown, setActiveDropdown] = useState(null);
-
   const openSidebar = (appointmentData) => {
     setSidebar({ isOpen: true, data: appointmentData });
-    setActiveDropdown(null);
   };
 
   const closeSidebar = () => {
@@ -78,12 +76,6 @@ export default function DoctorAppointmentList({ appointments = [] }) {
               const uniqueKey = appointment?.id
                 ? `app-${appointment.id}`
                 : `app-idx-${index}`;
-              const isMenuOpen = activeDropdown === appointment.id;
-
-              const openUpwards =
-                (appointments.length >= 3 &&
-                  index >= appointments.length - 2) ||
-                (appointments.length === 2 && index === 1);
 
               return (
                 <tr
@@ -174,32 +166,24 @@ export default function DoctorAppointmentList({ appointments = [] }) {
                     ) : null}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <div className="relative inline-block text-left">
-                      <button
-                        onClick={() =>
-                          setActiveDropdown(isMenuOpen ? null : appointment.id)
-                        }
-                        className="cursor-pointer rounded-full p-2 hover:bg-hover text-muted transition"
-                      >
+                    <Dropdown>
+                      <Dropdown.Trigger className="cursor-pointer rounded-full p-2 text-muted transition hover:bg-hover">
                         <MoreVertical className="h-4 w-4" />
-                      </button>
+                      </Dropdown.Trigger>
 
-                      {isMenuOpen && (
-                        <div
-                          className={`absolute right-0 w-36 bg-card border border-border rounded-lg shadow-lg z-50 p-1 text-left ${
-                            openUpwards ? "bottom-full mb-1" : "top-full mt-1"
-                          }`}
+                      <Dropdown.Content
+                        align="right"
+                        className="w-36 bg-card p-1 text-left"
+                      >
+                        <Dropdown.Item
+                          onSelect={() => openSidebar(appointment)}
+                          className="flex cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-xs font-medium transition hover:bg-[#2E37A4] hover:text-white"
                         >
-                          <button
-                            onClick={() => openSidebar(appointment)}
-                            className="w-full cursor-pointer flex items-center gap-2 rounded-md px-3 py-2 text-xs font-medium text-foreground transition hover:bg-[#2E37A4] hover:text-white"
-                          >
-                            <Eye className="h-3.5 w-3.5" />
-                            <span>View Details</span>
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                          <Eye className="h-3.5 w-3.5" />
+                          <span>View Details</span>
+                        </Dropdown.Item>
+                      </Dropdown.Content>
+                    </Dropdown>
                   </td>
                 </tr>
               );

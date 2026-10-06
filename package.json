@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "supabase:seed-demo": "tsx scripts/seed-demo-users.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.7.1",

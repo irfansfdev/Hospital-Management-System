@@ -38,6 +38,7 @@ interface PrescriptionTableProps {
 type SortOption = "recent" | "oldest" | "name";
 
 const MENU_WIDTH = 224; // matches w-56
+const MENU_HEIGHT = 160;
 const MENU_GAP = 8;
 
 // ---------------------------------------
@@ -101,19 +102,31 @@ function RowActionsMenu({
   const [position, setPosition] = useState<{
     top: number;
     left: number;
+    maxHeight: number;
   } | null>(null);
 
   useLayoutEffect(() => {
     if (!isOpen || !buttonRef.current) return;
 
     const rect = buttonRef.current.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom - MENU_GAP;
+    const spaceAbove = rect.top - MENU_GAP;
+    const placeAbove = MENU_HEIGHT > spaceBelow && spaceAbove > spaceBelow;
+    const availableHeight = Math.max(placeAbove ? spaceAbove : spaceBelow, 0);
+    const menuHeight = Math.min(MENU_HEIGHT, availableHeight);
 
     setPosition({
-      top: rect.bottom + MENU_GAP,
+      top: placeAbove
+        ? Math.max(MENU_GAP, rect.top - MENU_GAP - menuHeight)
+        : Math.min(
+            rect.bottom + MENU_GAP,
+            window.innerHeight - menuHeight - MENU_GAP,
+          ),
       left: Math.max(
         MENU_GAP,
         Math.min(rect.right - MENU_WIDTH, window.innerWidth - MENU_WIDTH - MENU_GAP),
       ),
+      maxHeight: availableHeight,
     });
   }, [isOpen]);
 
@@ -170,8 +183,12 @@ function RowActionsMenu({
           <div
             ref={menuRef}
             role="menu"
-            style={{ top: position.top, left: position.left }}
-            className="fixed z-9999 w-56 overflow-hidden rounded-xl border border-border bg-background py-2 shadow-lg ring-1 ring-black/5"
+            style={{
+              top: position.top,
+              left: position.left,
+              maxHeight: position.maxHeight,
+            }}
+            className="fixed z-9999 w-56 overflow-y-auto rounded-xl border border-border bg-background py-2 shadow-lg ring-1 ring-black/5"
           >
             <button
               type="button"

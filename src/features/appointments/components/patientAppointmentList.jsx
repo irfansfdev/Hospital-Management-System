@@ -21,7 +21,6 @@ export default function PatientAppointmentList({
     data: null,
   });
 
-  const [activeDropdown, setActiveDropdown] = useState(null);
   const [editFormData, setEditFormData] = useState({});
 
   const todayStr = new Date().toISOString().split('T')[0];
@@ -59,7 +58,6 @@ export default function PatientAppointmentList({
     if (mode === "edit") {
       setEditFormData(appointmentData);
     }
-    setActiveDropdown(null);
   };
 
   const closeSidebar = () => {
@@ -131,14 +129,8 @@ export default function PatientAppointmentList({
               const uniqueKey = appointment?.id
                 ? `app-${appointment.id}`
                 : `app-idx-${index}`;
-              const isMenuOpen = activeDropdown === appointment.id;
               const currentStatus = appointment.status?.toLowerCase();
               const isEditable = currentStatus === "pending";
-
-              const openUpwards =
-                (appointments.length >= 3 &&
-                  index >= appointments.length - 2) ||
-                (appointments.length === 2 && index === 1);
 
               return (
                 <tr
@@ -197,40 +189,34 @@ export default function PatientAppointmentList({
                   </td>
 
                   <td className="px-6 py-4 text-right whitespace-nowrap">
-                    <div className="relative inline-block text-left">
-                      <button
-                        onClick={() => {
-                          setActiveDropdown(isMenuOpen ? null : appointment.id);
-                        }}
-                        className="cursor-pointer rounded-full p-2 hover:bg-black/5 dark:hover:bg-white/10 text-muted-foreground transition"
-                      >
+                    <Dropdown>
+                      <Dropdown.Trigger className="cursor-pointer rounded-full p-2 text-muted-foreground transition hover:bg-black/5 dark:hover:bg-white/10">
                         <MoreVertical className="h-4 w-4" />
-                      </button>
+                      </Dropdown.Trigger>
 
-                      {isMenuOpen && (
-                        <div
-                          className={`absolute right-0 w-36 bg-background border border-border rounded-lg shadow-lg z-50 py-1 text-left ${openUpwards ? "bottom-full mb-1" : "top-full mt-1"}`}
+                      <Dropdown.Content
+                        align="right"
+                        className="w-36 text-left"
+                      >
+                        <Dropdown.Item
+                          onSelect={() => openSidebar("view", appointment)}
+                          className="flex cursor-pointer items-center gap-2 px-3 py-2 text-xs transition hover:bg-black/5 dark:hover:bg-white/5"
                         >
-                          <button
-                            onClick={() => openSidebar("view", appointment)}
-                            className="w-full cursor-pointer flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-black/5 dark:hover:bg-white/5 transition"
-                          >
-                            <Eye className="h-3.5 w-3.5 text-blue-500" />
-                            <span>View</span>
-                          </button>
+                          <Eye className="h-3.5 w-3.5 text-blue-500" />
+                          <span>View</span>
+                        </Dropdown.Item>
 
-                          {isEditable && (
-                            <button
-                              onClick={() => openSidebar("edit", appointment)}
-                              className="w-full cursor-pointer flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-black/5 dark:hover:bg-white/5 transition"
-                            >
-                              <Edit className="h-3.5 w-3.5 text-emerald-500" />
-                              <span>Edit</span>
-                            </button>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                        {isEditable && (
+                          <Dropdown.Item
+                            onSelect={() => openSidebar("edit", appointment)}
+                            className="flex cursor-pointer items-center gap-2 px-3 py-2 text-xs transition hover:bg-black/5 dark:hover:bg-white/5"
+                          >
+                            <Edit className="h-3.5 w-3.5 text-emerald-500" />
+                            <span>Edit</span>
+                          </Dropdown.Item>
+                        )}
+                      </Dropdown.Content>
+                    </Dropdown>
                   </td>
                 </tr>
               );
